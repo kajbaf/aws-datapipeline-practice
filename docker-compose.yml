@@ -33,6 +33,20 @@ services:
       - WAREHOUSE_PATH=/s3-datalake
     restart: unless-stopped
 
+# Containerized engine to run ETL scripts as Jupyter Notebooks
+  notebook:
+    image: notebook
+    build:
+      context: ./
+      dockerfile: infra/Dockerfile
+    restart: no
+    env_file: infra/.env
+    volumes:
+      - ./notebooks:/prj/notebooks
+      - s3-datalake:/s3-datalake
+    depends_on:
+      - spark
+
 volumes:
   s3-datalake: # named volume for datalake
     driver: local

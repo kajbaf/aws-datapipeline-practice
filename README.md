@@ -26,6 +26,6 @@ This project uses multiple modern technologies for processing and analyzing data
 - **Apache Spark** For scalable, distributed data processing
 - **Pandas** For exploratory analysis and lightweight transformation
 - **Delta Lake** As the Open Table Format for data storage whih can supports ACID transactions
-- **DBT** For writing transformation and data models and managing data lineage
+- **Jupyter** For writing transformation and ETL scripts
 - **Docker Compose** To simulate a local execution cluster and cloud-like data lake environment
 This setup reflects how I typically design and build local dev environments for data teams, which can simulate realtime production systems in a modular, testable way.

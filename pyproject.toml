@@ -1,0 +1,14 @@
+[project]
+name = "data-engineering-practice"
+version = "0.1.0"
+description = "This project contains a sample architecture for playing Data Engineering and Analytic concepts"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "delta-spark==4.0.0",
+    "fastparquet>=2024.11.0",
+    "notebook>=7.4.3",
+    "pandas>=2.3.0",
+    "pyspark==4.0.0",
+    "pytz>=2025.2",
+]
