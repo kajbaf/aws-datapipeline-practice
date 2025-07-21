@@ -51,3 +51,8 @@ clean:
 	@echo "Stopping and removing containers and volumes..."
 	docker-compose down -v
 	@echo "Cleaned up."
+
+.PHONY: format
+format:
+	@echo "Formatting Python code and notebooks"
+	uv run format .
