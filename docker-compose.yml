@@ -1,0 +1,67 @@
+# Source https://github.com/kajbaf/social-media-datawarehouse/blob/master/docker-compose.yml
+services:
+  spark:
+    image: docker.io/bitnami/spark:4.0.0
+    container_name: spark
+    volumes:
+      - s3-datalake:/s3-datalake
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - WAREHOUSE_PATH=/s3-datalake
+    ports:
+      - '8080:8080'
+    restart: unless-stopped
+
+# We can create as much as workers as we need using --scale param
+  worker:
+    image: docker.io/bitnami/spark:4.0.0
+    volumes:
+      - s3-datalake:/s3-datalake
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - WAREHOUSE_PATH=/s3-datalake
+    restart: unless-stopped
+
+# Containerized engine to run ETL scripts as Jupyter Notebooks
+  notebook:
+    image: notebook
+    build:
+      context: ./
+      dockerfile: infra/Dockerfile
+    restart: no
+    env_file: infra/.env
+    ports:
+      - "8888:8888"   # Jupyter Notebook port
+    command: [
+      "jupyter-notebook",
+      "--ip=0.0.0.0",
+      "--port=8888",
+      "--notebook-dir=/prj/notebooks",
+      "--no-browser",
+      "--allow-root",
+      "--NotebookApp.token=''"
+    ]
+    volumes:
+      - ./notebooks:/prj/notebooks
+      - s3-datalake:/s3-datalake
+    depends_on:
+      - spark
+
+volumes:
+  s3-datalake: # named volume for datalake
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./s3-datalake

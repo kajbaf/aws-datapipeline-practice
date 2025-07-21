@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+.venv
+.secret
+.vscode
+.idea
+.env
+.envrc
+**/logs/
+**/.ipynb_checkpoints
+**/metastore_db/
+.DS_Store
+s3-datalake/**
+derby.log
