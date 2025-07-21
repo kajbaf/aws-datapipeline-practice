@@ -2,7 +2,7 @@
 FROM docker.io/bitnami/spark:4.0.0 AS spark
 
 ## Stage 2: Use base Python image
-FROM python:3.11.12-slim AS compile-image
+FROM python:3.12.11-slim AS compile-image
 
 # Update image
 RUN apt-get update && \
