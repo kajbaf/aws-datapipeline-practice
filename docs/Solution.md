@@ -1,8 +1,6 @@
 # Data Engineering Practice
 
-This project demonstrates a practical data pipeline built using a modern data stack: Apache Spark, Delta Lake, and local containerized infrastructure. The focus is on profiling, modeling, and transforming customer and sales data into analytics-ready Delta Lake tables. This environment is lightweight but reflects production-grade architecture principles.
-
-I usually set up such systems with a some additional components like `dbt` and `Airflow` as a local development environment which data teams can use to debug their queries locally before deploying to the production environment.
+This project demonstrates a practical data pipeline built using a modern data stack: Apache Spark, Delta Lake, and local containerized infrastructure. The focus is on profiling, modeling, and transforming customer and sales data into analytics-ready Delta Lake tables.
 
 Although I usually include components like `dbt` and `Airflow` in such projects for local debugging of data pipelines, they are not used in this implementation. However, the project structure supports modular development and can be easily extended with orchestration and semantic modeling layers in future iterations.
 
@@ -11,7 +9,7 @@ To review the original problem statement, see:
 
 ## Goal
 
-The primary objective is to integrate and clean customer and sales data, model it into a well-partitioned analytical table in an Open Table Format (Delta Lake), and make it query-optimized for downstream use.
+The primary objective is to integrate and clean customer and sales data, model it into a well-partitioned analytical table using an Open Table Format (Delta Lake), and make it optimized for analytical queries.
 
 This local implementation includes design principles aligned with production systems:
 
@@ -20,22 +18,19 @@ This local implementation includes design principles aligned with production sys
 * Data quality rules and failure tolerance
 * Reusable, inspectable notebooks and PySpark jobs
 
-For more details see:
-> [Architecture](docs/architecture.md)
-
 ## Task 1: Integrate Data and Build Data Models
 Here is the task break down of setting up a proper system for data modeling.
-### Step 1 – Validate Environment
+### Step 1 - Validate Environment
 > Set up Spark, Delta Lake and Jupyter Notebooks, and validates cluster connectivity and proper mapping of storage paths.
 
 **Notebook:** [TestConnect](../notebooks/TestConnection.ipynb)
 
-### Step 2 – Exploratory Analysis*:
-> Profile source data, identify outliers, nulls, schema inconsistencies, and candidate keys using Pandas.
+### Step 2 - Exploratory Analysis:
+> Profile source data, identify outliers, nulls, schema inconsistencies, and candidate keys using Pandas and YData Profiler.
 
 **Notebook:** [ExploreData](../notebooks/ExploreData.ipynb)
 
-**Report**
+**Summerized Report**
 
 1. **Schema Consistency**:
 
@@ -62,13 +57,12 @@ is stored as string (e.g., "15-10-2022"), which needs conversion.
 > **Action:**
 > - Apply a date parser and validate that `invoice_date` is consistent and convertible.
 > - `customer_id`, `invoice_date`, and `invoice_no` are essential, rows with missing values here will be dropped in Silver.
-> - `age` is non-critical — missing values will be retained as null and filled into an `"Unknown"` age band during modeling.
+> - `age` is non-critical - missing values will be retained as null and filled into an `"Unknown"` age band during modeling.
 3. Outliers and Numerical Ranges
-* `quantity` is within valid bounds for retail purchases (1–5); no filtering needed.
-* `price` has high variance; we'll check for negative prices and flag values above 99th percentile for review or anomaly tagging.
+* `quantity` is within valid bounds for retail purchases (1-5); no filtering needed.
+* `price` has high variance; we'll check for negative prices and define price bucketing.
 > **Action:**
 > * Check for negative values (invalid value)
-> * Abnormally large values (suspicious activity)
 
 ### Step 3 - Data Modeling:
 > Define core analytical goals and model design (e.g., grain, schema, dimensions), along with data quality considerations and assumptions.
@@ -87,24 +81,28 @@ is stored as string (e.g., "15-10-2022"), which needs conversion.
 | Column          | Use in Analytics                         | Comment                           |
 |-----------------|-------------------------------------------|-----------------------------------|
 | `gender`        | Segmentation, funnel breakdown            | Standard categories               |
-| `age`           | Bucketization, cohort analysis            | Define age bands (e.g., 18–25…)   |
+| `age`           | Bucketization, cohort analysis            | Define age bands (e.g., 18-25…)   |
 | `payment_method`| Payment trend analysis, fraud detection   | Normalize spelling/capitalization |
 | `shopping_mall` | Store-level performance, regional trends  | Optional enrichment               |
 | `category`      | Category mix, AOV by product group        | Could evolve into full dim_product|
 | `invoice_date`  | Time-based analytics, incremental loading | Must be parsed to derive calendar dim |
 
 
-**Modeling Implications:**
+**Modeling Outputs:**
   * Fact Table:
     - `fact_sales_by_customer`
         * PK: `invoice_no`, granularity: one line per invoice
         * FK: `customer_id`, `category`, `shopping_mall`, `invoice_date`
   * Dimensions:
     - `dim_customer`(`customer_id` PK): `customer_id`, `age`, `gender`, `payment_method`
+  * Report Table:
+    - `report_sales_by_segment`
+        * PK: `age_band`, `gender` granularity: one line per segment
 
 ### Step 4: Developing ETL/ELT:
-Based on the data models defined above, we will implement 
-Implement medallion-style transformation: bronze -> silver -> gold. Write gold outputs to Delta Lake, optimized for analytics performance.
+Based on the data models defined above, we will:
+* Implement medallion-style transformation: bronze -> silver -> gold.
+* Write gold outputs to Delta Lake and optimize them for analytics performance.
 
 **Notebook:** [LoadData](../notebooks/LoadData.ipynb)
 

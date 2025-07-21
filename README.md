@@ -21,15 +21,23 @@ Modern applications generate a large amount and variety of data, across many sys
 - Orchestration / workflow / performance
 - Monitoring (failure, optimization, etc.)
 
-## Tech Stack
+## Solution
+
+### Tech Stack
 This project uses multiple modern technologies for processing and analyzing data, including:
 - **Apache Spark** For scalable, distributed data processing
 - **Delta Lake** As the Open Table Format for data storage whih can supports ACID transactions
 - **Pandas** For exploratory analysis and lightweight transformation
 - **Jupyter** For writing transformation and ETL scripts
 - **Docker Compose** To simulate a local execution cluster and cloud-like data lake environment
+- **UV** To manage Python requirements efficiently and securely
+
 This setup reflects how I typically design and build local dev environments for data teams, which can simulate realtime production systems in a modular, testable way.
 
-## Solution
-This document contains the solution to the problem mentioned above.
+### ETL System
+This document contains the solution to the Ingestion Pipeline.
 [Solution Document](./docs/Solution.md)
+
+### Data Pipeline Architecture
+This document contains the solution to the High Level Desing.
+[Architecture Document](./docs/Architecture.md)
